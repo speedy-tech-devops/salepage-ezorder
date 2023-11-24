@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 export default function Home() {
   const [formData, setFormData] = useState({
+    shopName : '',
     name: '',
     phoneNumber: '',
     email: '',
@@ -12,6 +13,7 @@ export default function Home() {
   });
 
   const [errors, setErrors] = useState({
+    shopName : '',
     name: '',
     phoneNumber: '',
     email: '',
@@ -24,8 +26,14 @@ export default function Home() {
   };
   const validateForm = () => {
     let valid = true;
+    if (!formData.shopName.trim()) {
+      setErrors((prevErrors) => ({ ...prevErrors, shopName: ' กรุณาใส่ชื่อร้าน' }));
+      valid = false;
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+    }
     if (!formData.name.trim()) {
-      setErrors((prevErrors) => ({ ...prevErrors, name: 'ชื่อ-นามสกุล ผู้ติดต่อ ห้ามว่าง' }));
+      setErrors((prevErrors) => ({ ...prevErrors, name: 'กรุณาใส่ชื่อ ชื่อ-นามสกุล ผู้ติดต่อ' }));
       valid = false;
     } else {
       setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
@@ -98,6 +106,19 @@ export default function Home() {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="row ">
+                <div className="form-group col-sm-12 mb-1">
+                    <label className="mb-1 font-md" htmlFor="name">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
+                    <input
+                      type="text"
+                      className={`border_dark_blue form-control ${errors.shopName ? 'is-invalid' : ''}`}
+                      id="name"
+                      name="name"
+                      placeholder="ชื่อ-นามสกุล"
+                      value={formData.shopName}
+                      onChange={handleChange}
+                    />
+                    {errors.name && <div className="invalid-feedback">{errors.shopName}</div>}
+                  </div>
                   <div className="form-group col-sm-12 mb-1">
                     <label className="mb-1 font-md" htmlFor="name">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
                     <input
