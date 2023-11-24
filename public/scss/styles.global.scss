@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: "SDB_Heavent_Reg";
+}
+
+$path: "../font/";
+@font-face {
+    font-family: "DB_Heavent_Li";
+    src: url("#{$path}/DB_Heavent_Li.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "DB_Heavent_Med";
+    src: url("#{$path}/DB_Heavent_Med.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "SDB_Heavent_Reg";
+    src: url("#{$path}/DB_Heavent_Reg.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@mixin remove-btn {
+    background-color: unset;
+    border: unset;
+    outline: none !important;
+}
+@mixin ellipsis($value) {
+    display: -webkit-box;
+    -webkit-line-clamp: $value;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.text_dark_blue{
+    color: rgb(22, 40, 75) !important;
+}
+.bg_dark_blue{
+    background-color: rgb(22, 40, 75) !important;
+}
+.border_dark_blue{
+    border: 2px solid rgb(22, 40, 75) !important;
+}
+.box-shodow{
+    box-shadow: 0px 0px 5px #000;
+}
+.font-md{
+    font-family: "DB_Heavent_Med" !important;
+}
+.font-li{
+    font-family: "DB_Heavent_Li" !important;
+}
