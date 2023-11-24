@@ -1,6 +1,83 @@
+'use client'
+import React, { useState } from 'react';
+import axios from 'axios';
 import Image from 'next/image'
 
 export default function Home() {
+  const [formData, setFormData] = useState({
+    name: '',
+    phoneNumber: '',
+    email: '',
+    password: '',
+  });
+
+  const [errors, setErrors] = useState({
+    name: '',
+    phoneNumber: '',
+    email: '',
+    password: '',
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' }); 
+  };
+  const validateForm = () => {
+    let valid = true;
+    if (!formData.name.trim()) {
+      setErrors((prevErrors) => ({ ...prevErrors, name: 'ชื่อ-นามสกุล ผู้ติดต่อ ห้ามว่าง' }));
+      valid = false;
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+    }
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phoneNumber)) {
+      setErrors((prevErrors) => ({ ...prevErrors, phoneNumber: 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง' }));
+      valid = false;
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, phoneNumber: '' }));
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setErrors((prevErrors) => ({ ...prevErrors, email: 'รูปแบบอีเมลไม่ถูกต้อง' }));
+      valid = false;
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+    }
+    if (formData.password.length > 20) {
+      setErrors((prevErrors) => ({ ...prevErrors, password: 'รหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร' }));
+      valid = false;
+    } else if (formData.password.length < 8) {
+      setErrors((prevErrors) => ({ ...prevErrors, password: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' }));
+      valid = false;
+    } else if (formData.password.length <= 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, password: 'กรุณาใส่รหัสผ่าน' }));
+      valid = false;
+    } else {
+      setErrors((prevErrors) => ({ ...prevErrors, password: '' }));
+    }
+
+    return valid;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (validateForm()) {
+      // ต่อ api มัส
+      await axios.post('/', formData)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          const { data } = error.response;
+          setErrors(data.errors);
+        } else {
+          console.error('Error:', error.message);
+        }
+      });
+    }
+  };
   return (
     <div className="page-wrapper py-3">
       <div className="container">
@@ -19,77 +96,59 @@ export default function Home() {
                 <h3>แบบฟอร์มลงทะเบียนติดต่อพนักงานขาย</h3>
                 <p>พร้อมติดต่อกลับใน 1 ชั่วโมง</p>
               </div>
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="row ">
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>ชื่อ-นามสกุล ผู้ติดต่อ*</label>
-                    <input type className="border_dark_blue form-control" id placeholder="ชื่อ-นามสกุล" />
+                  <div className="form-group col-sm-12 mb-1">
+                    <label className="mb-1 font-md" htmlFor="name">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
+                    <input
+                      type="text"
+                      className={`border_dark_blue form-control ${errors.name ? 'is-invalid' : ''}`}
+                      id="name"
+                      name="name"
+                      placeholder="ชื่อ-นามสกุล"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                   </div>
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>เบอร์โทรศัพท์*</label>
-                    <input type className="border_dark_blue form-control" id placeholder="เบอร์โทรศัพท์" />
+                  <div className="form-group col-sm-12 mb-1">
+                    <label className="mb-1 font-md" htmlFor="phoneNumber">เบอร์โทรศัพท์*</label>
+                    <input
+                      type="number"
+                      className={`border_dark_blue form-control ${errors.phoneNumber ? 'is-invalid' : ''}`}
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      placeholder="เบอร์โทรศัพท์"
+                      value={formData.phoneNumber}
+                      onChange={handleChange}
+                    />
+                    {errors.phoneNumber && <div className="invalid-feedback">{errors.phoneNumber}</div>}
                   </div>
-                </div>
-                <div className="row">
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>เบอร์โทรศัพท์สำรอง (ถ้ามี)</label>
-                    <input type className="border_dark_blue form-control" id placeholder="เบอร์โทรศัพท์สำรอง" />
+                  <div className="form-group col-sm-12 mb-1">
+                    <label className="mb-1 font-md" htmlFor="email">อีเมล </label>
+                    <input
+                      type="email"
+                      className={`border_dark_blue form-control ${errors.email ? 'is-invalid' : ''}`}
+                      id="email"
+                      name="email"
+                      placeholder="อีเมล"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                   </div>
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>LINE ID (ไลน์ไอดี)</label>
-                    <input type className="border_dark_blue form-control" id placeholder="ไลน์ไอดี" />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>จังหวัด (ที่ตั้งร้าน)*</label>
-                    <input type className="form-control border_dark_blue " id placeholder="จังหวัดที่ตั้งร้าน" />
-                  </div>
-                  <div className="form-group col-sm-6 mb-3">
-                    <label className="mb-1 font-md" htmlFor>เขต/อำเภอ (ที่ตั้งร้าน)*</label>
-                    <input type className="form-control border_dark_blue " id placeholder="เขต/อำเภอ ที่ตั้งร้าน" />
-                  </div>
-                </div>
-                <div className="row">
                   <div className="form-group col-sm-12 mb-3">
-                    <label className="mb-1 font-md" htmlFor="inputState">สนใจติดต่อเรื่องใด</label>
-                    <select id="inputState" className="border_dark_blue form-control">
-                      <option selected>โปรดเลือกเรื่องที่ต้องการติดต่อ</option>
-                      <option>ติดต่อพนักงาน สนใจใช้งานระบบ ez-order</option>
-                      <option>ต่ออายุการใช้งาน ez-order</option>
-                      <option>ติดต่อฝ่ายบริการช่วยเหลือแก้ไขปัญหา</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="form-group col-sm-12 mb-3">
-                    <label className="mb-1 font-md" htmlFor="inputState">ท่านสนใจ ez-order รุ่นใด</label>
-                    <select id="inputState" className="border_dark_blue form-control">
-                      <option selected>ez-order POS (iPad)</option>
-                      <option>Wongnai POS รุ่น Mini</option>
-                      <option>Wongnai POS รุ่น 1 จอ</option>
-                      <option>Wongnai POS รุ่น 2 จอ</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="form-group col-sm-12 mb-4">
-                    <label className="mb-1 font-md" htmlFor="inputState">คุณรู้จัก ez-order จากไหน*</label>
-                    <select id="inputState" className="border_dark_blue form-control">
-                      <option selected>คุณรู้จัก ez-order จากไหน</option>
-                      <option>Facebook</option>
-                      <option>Google</option>
-                      <option>Instagram</option>
-                      <option>Tiktok</option>
-                      <option>YouTube</option>
-                      <option>บทความบนเว็บไซต์ https://www.ez-order.co/</option>
-                      <option>มีผู้อื่นแนะนำ</option>
-                      <option>เห็นจากลูกค้าท่านอื่น</option>
-                      <option>Influencer: torpenguin ต่อเพนกวิน</option>
-                      <option>Influencer: เพื่อนแท้ร้านอาหาร</option>
-                      <option>Influencer อื่นๆ</option>
-                      <option>แอป Wongnai Merchant App</option>
-                    </select>
+                    <label className="mb-1 font-md" htmlFor="password">รหัสผ่าน </label>
+                    <input
+                      type="password"
+                      className={`border_dark_blue form-control ${errors.password ? 'is-invalid' : ''}`}
+                      id="password"
+                      name="password"
+                      placeholder="รหัสผ่าน"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                   </div>
                 </div>
                 <div className="text-center mb-2">
