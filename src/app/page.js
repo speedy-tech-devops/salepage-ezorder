@@ -2,22 +2,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image'
-
+import Swal from 'sweetalert2'
 export default function Home() {
   const [formData, setFormData] = useState({
-    shopName : '',
-    name: '',
-    phoneNumber: '',
-    email: '',
-    password: '',
+    ShopName : '',
+    FullName: '',
+    Mobile: '',
+    Email: '',
+    Password: '',
+    PackageType: 'PLUS',
+    ShopType : "RESTAURANT"
   });
 
   const [errors, setErrors] = useState({
-    shopName : '',
-    name: '',
-    phoneNumber: '',
-    email: '',
-    password: '',
+    ShopName : '',
+    FullName: '',
+    Mobile: '',
+    Email: '',
+    Password: '',
+    PackageType: 'PLUS',
+    ShopType : "RESTAURANT"
   });
 
   const handleChange = (e) => {
@@ -26,64 +30,79 @@ export default function Home() {
   };
   const validateForm = () => {
     let valid = true;
-    if (!formData.shopName.trim()) {
-      setErrors((prevErrors) => ({ ...prevErrors, shopName: ' กรุณาใส่ชื่อร้าน' }));
+    if (!formData.ShopName.trim()) {
+      setErrors((prevErrors) => ({ ...prevErrors, ShopName: ' กรุณาใส่ชื่อร้าน' }));
       valid = false;
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+      setErrors((prevErrors) => ({ ...prevErrors, FullName: '' }));
     }
-    if (!formData.name.trim()) {
-      setErrors((prevErrors) => ({ ...prevErrors, name: 'กรุณาใส่ชื่อ ชื่อ-นามสกุล ผู้ติดต่อ' }));
+    if (!formData.FullName.trim()) {
+      setErrors((prevErrors) => ({ ...prevErrors, FullName: 'กรุณาใส่ชื่อ ชื่อ-นามสกุล ผู้ติดต่อ' }));
       valid = false;
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+      setErrors((prevErrors) => ({ ...prevErrors, FullName: '' }));
     }
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(formData.phoneNumber)) {
-      setErrors((prevErrors) => ({ ...prevErrors, phoneNumber: 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง' }));
+    if (!phoneRegex.test(formData.Mobile)) {
+      setErrors((prevErrors) => ({ ...prevErrors, Mobile: 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง' }));
       valid = false;
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, phoneNumber: '' }));
+      setErrors((prevErrors) => ({ ...prevErrors, Mobile: '' }));
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrors((prevErrors) => ({ ...prevErrors, email: 'รูปแบบอีเมลไม่ถูกต้อง' }));
+    if (!emailRegex.test(formData.Email)) {
+      setErrors((prevErrors) => ({ ...prevErrors, Email: 'รูปแบบอีเมลไม่ถูกต้อง' }));
       valid = false;
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+      setErrors((prevErrors) => ({ ...prevErrors, Email: '' }));
     }
-    if (formData.password.length > 20) {
-      setErrors((prevErrors) => ({ ...prevErrors, password: 'รหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร' }));
+    if (formData.Password.length > 20) {
+      setErrors((prevErrors) => ({ ...prevErrors, Password: 'รหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร' }));
       valid = false;
-    } else if (formData.password.length < 8) {
-      setErrors((prevErrors) => ({ ...prevErrors, password: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' }));
+    } else if (formData.Password.length < 8) {
+      setErrors((prevErrors) => ({ ...prevErrors, Password: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' }));
       valid = false;
-    } else if (formData.password.length <= 0) {
-      setErrors((prevErrors) => ({ ...prevErrors, password: 'กรุณาใส่รหัสผ่าน' }));
+    } else if (formData.Password.length <= 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, Password: 'กรุณาใส่รหัสผ่าน' }));
       valid = false;
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, password: '' }));
+      setErrors((prevErrors) => ({ ...prevErrors, Password: '' }));
     }
 
     return valid;
   };
+  const senddata = async (params) => {
+    console.log(params);
+    const url = "https://api-ezorder.speedy-tech.co/v1/register"
+    console.log(url);
+     const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: params
+    });
+     const json = await response.json();
+     console.log(json);
+     return json;
+}
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (validateForm()) {
       // ต่อ api มัส
-      await axios.post('/', formData)
-      .then((response) => {
-        console.log(response.data);
+      await senddata(JSON.stringify(formData)).then((res)=> {
+        Swal.fire({
+          icon: "success",
+          title: "ลงทะเบียนสำเร็จ",
+          html: `
+            <p>ข้อมูลจะถูกส่งไปทางอีเมลของท่านค่ะ</p>
+            <button class="btn text-white" style="background-color:#06C755;font-size: 24px;min-width: 250px" onclick="location.href='https://lin.ee/AWjp3I3'">เพิ่มเพื่อน</button>
+          `,
+          showConfirmButton: false,
+        });
+        return res.data
+
       })
-      .catch((error) => {
-        if (error.response) {
-          const { data } = error.response;
-          setErrors(data.errors);
-        } else {
-          console.error('Error:', error.message);
-        }
-      });
     }
   };
   return (
@@ -107,69 +126,69 @@ export default function Home() {
               <form onSubmit={handleSubmit}>
                 <div className="row ">
                 <div className="form-group col-sm-12 mb-1">
-                    <label className="mb-1 font-md" htmlFor="name">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
+                    <label className="mb-1 font-md" htmlFor="ShopName">ชื่อร้าน *</label>
                     <input
                       type="text"
-                      className={`border_dark_blue form-control ${errors.shopName ? 'is-invalid' : ''}`}
-                      id="name"
-                      name="name"
-                      placeholder="ชื่อ-นามสกุล"
-                      value={formData.shopName}
+                      className={`border_dark_blue form-control ${errors.ShopName ? 'is-invalid' : ''}`}
+                      id="ShopName"
+                      name="ShopName"
+                      placeholder="ชื่อร้าน *"
+                      value={formData.ShopName}
                       onChange={handleChange}
                     />
-                    {errors.name && <div className="invalid-feedback">{errors.shopName}</div>}
+                    {errors.ShopName && <div className="invalid-feedback">{errors.ShopName}</div>}
                   </div>
                   <div className="form-group col-sm-12 mb-1">
-                    <label className="mb-1 font-md" htmlFor="name">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
+                    <label className="mb-1 font-md" htmlFor="FullName">ชื่อ-นามสกุล ผู้ติดต่อ*</label>
                     <input
                       type="text"
-                      className={`border_dark_blue form-control ${errors.name ? 'is-invalid' : ''}`}
-                      id="name"
-                      name="name"
+                      className={`border_dark_blue form-control ${errors.FullName ? 'is-invalid' : ''}`}
+                      id="FullName"
+                      name="FullName"
                       placeholder="ชื่อ-นามสกุล"
                       value={formData.name}
                       onChange={handleChange}
                     />
-                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+                    {errors.FullName && <div className="invalid-feedback">{errors.FullName}</div>}
                   </div>
                   <div className="form-group col-sm-12 mb-1">
-                    <label className="mb-1 font-md" htmlFor="phoneNumber">เบอร์โทรศัพท์*</label>
+                    <label className="mb-1 font-md" htmlFor="Mobile">เบอร์โทรศัพท์*</label>
                     <input
                       type="number"
-                      className={`border_dark_blue form-control ${errors.phoneNumber ? 'is-invalid' : ''}`}
-                      id="phoneNumber"
-                      name="phoneNumber"
+                      className={`border_dark_blue form-control ${errors.Mobile ? 'is-invalid' : ''}`}
+                      id="Mobile"
+                      name="Mobile"
                       placeholder="เบอร์โทรศัพท์"
-                      value={formData.phoneNumber}
+                      value={formData.Mobile}
                       onChange={handleChange}
                     />
-                    {errors.phoneNumber && <div className="invalid-feedback">{errors.phoneNumber}</div>}
+                    {errors.Mobile && <div className="invalid-feedback">{errors.Mobile}</div>}
                   </div>
                   <div className="form-group col-sm-12 mb-1">
-                    <label className="mb-1 font-md" htmlFor="email">อีเมล </label>
+                    <label className="mb-1 font-md" htmlFor="Email">อีเมล </label>
                     <input
                       type="email"
-                      className={`border_dark_blue form-control ${errors.email ? 'is-invalid' : ''}`}
-                      id="email"
-                      name="email"
+                      className={`border_dark_blue form-control ${errors.Email ? 'is-invalid' : ''}`}
+                      id="Email"
+                      name="Email"
                       placeholder="อีเมล"
-                      value={formData.email}
+                      value={formData.Email}
                       onChange={handleChange}
                     />
-                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                    {errors.Email && <div className="invalid-feedback">{errors.Email}</div>}
                   </div>
                   <div className="form-group col-sm-12 mb-3">
-                    <label className="mb-1 font-md" htmlFor="password">รหัสผ่าน </label>
+                    <label className="mb-1 font-md" htmlFor="Password">รหัสผ่าน </label>
                     <input
                       type="password"
-                      className={`border_dark_blue form-control ${errors.password ? 'is-invalid' : ''}`}
-                      id="password"
-                      name="password"
+                      className={`border_dark_blue form-control ${errors.Password ? 'is-invalid' : ''}`}
+                      id="Password"
+                      name="Password"
                       placeholder="รหัสผ่าน"
-                      value={formData.password}
+                      value={formData.Password}
                       onChange={handleChange}
                     />
-                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                    {errors.Password && <div className="invalid-feedback">{errors.Password}</div>}
                   </div>
                 </div>
                 <div className="text-center mb-2">
